@@ -70,14 +70,14 @@ X = scale.fit_transform(X)
 y_true = y
 
 all_churn_df = churn_dummies
-all_churn_df['all_churn'] = 1.0
+all_churn_df['all_churn'] = 0.0
 all_churn = all_churn_df['all_churn']
 y_pred = np.where(all_churn == 1, 1, 0)
 
 
 #%%""" Models """
 
-from sklearn.linear_model import LogisticRegressionCV as LR
+from sklearn.linear_model import LogisticRegression as LR
 from sklearn.tree import DecisionTreeClassifier as DT
 from sklearn.ensemble import RandomForestClassifier as RF
 
@@ -86,7 +86,7 @@ score_metric = 'accuracy'
 
 def optimization(classifier):
     if classifier == LR:
-        param_grid = {'class_weight': ['balanced'], 'solver': ['liblinear', 'sag'], 'cv': [5], 'refit': ['True', 'False']}
+        param_grid = {'class_weight': ['balanced'], 'solver': ['liblinear', 'sag']}
     if classifier == DT:
         param_grid = {'criterion': ['gini', 'entropy'], 'splitter': ['best', 'random'], 'class_weight': ['balanced']}
     if classifier == RF:
@@ -99,7 +99,7 @@ def optimization(classifier):
     print('Best score: ' + str(search.best_score_))
 
 
-lr_params = {'refit': 'True', 'solver': 'sag', 'class_weight': 'balanced', 'cv': 5}
+lr_params = {'solver': 'liblinear', 'class_weight': 'balanced'}
 dt_params = {'splitter': 'best', 'criterion': 'entropy', 'class_weight': 'balanced'}
 rf_params = {'n_estimators': 10, 'criterion': 'entropy', 'bootstrap': 'True'}
 
@@ -128,7 +128,7 @@ print("Zero Rate:")
 print("%.3f" % avg_correct(y_true, y_pred))
 
 print('Logistic Regression:')
-print("%.3f" % avg_correct(y, run_cv(X,y,LR,refit=True, solver='sag', class_weight='balanced',cv=5)))
+print("%.3f" % avg_correct(y, run_cv(X,y,LR,solver='liblinear', class_weight='balanced')))
 
 print('Decision Tree:')
 print("%.3f" % avg_correct(y, run_cv(X,y,DT,splitter='best',criterion='entropy',class_weight='balanced')))
@@ -149,7 +149,7 @@ class_names = np.unique(y)
 zr_cm = confusion_matrix(y_true, y_pred)
 lr_cm = confusion_matrix(y,run_cv(X,y,LR))
 dt_cm = confusion_matrix(y,run_cv(X,y,DT))
-rf_cm = confusion_matrix(y,run_cv(X,y,DT))
+rf_cm = confusion_matrix(y,run_cv(X,y,RF))
 
 #%%
 
